@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+
+  db-mysql:
+    image: mysql:8-debian
+    platform: linux/amd64
+    container_name: db-mysql
+    volumes:
+      - ./db-conf/mysql.conf.d/my.cnf:/etc/mysql/my.cnf
+    ports:
+      - "3306:3306"
+    env_file:
+      - db-conf/mysql.env
+
+  db-migration:
+    container_name: db-migration
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+    build:
+      context: ./flyway
+      dockerfile: Dockerfile
+    volumes:
+      - ./flyway/conf/flyway.conf:/flyway/conf/flyway.conf
+      - ./flyway/migration:/flyway/sql
+    depends_on:
+      - db-mysql
